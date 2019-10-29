@@ -83,19 +83,20 @@ router.get('/:id', (req,res) => {
 router.get('/:id/comments', (req, res) => {
         const {id} = req.params;
 
-        if(id === 0){
+        if(id === null || id === {} || !id || id === req.body.id){
             console.log(id);
-            res.status(404).json({ message: "The post with the specified ID does not exist."})
-        } else{
-        Db.findCommentById(id)
-        .then(comment => {
-            console.log(comment);
-            res.status(500).json({ error: "The comments information could not be retrieved." });
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json({ error: "The comments information could not be retrieved." });
-        });
+            res.status(404).json({ message: "The comment with the specified ID does not exist."})
+        } else {
+            Db.findCommentById(id)
+                .then(comment => {
+                    // console.log(req.query); ==> returns an empty object
+                    console.log(comment);
+                    res.status(200).json(comment);
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).json({ error: 'The comment information could not be retrieved.' });
+                });
         }
 })
 
