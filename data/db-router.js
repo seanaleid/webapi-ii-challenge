@@ -58,15 +58,36 @@ router.get('/', (req,res) => {
         });
 })
 
+// === 4 === When the client makes a `GET` request to `/api/posts/:id`:
+router.get('/:id', (req,res) => {
+    const {id} = req.params;
+
+    if(id === null || id === {} || !id || id === req.body.id){
+        console.log(id);
+        res.status(404).json({ message: "The post with the specified ID does not exist."})
+    } else {
+        Db.findById(id)
+            .then(posts => {
+                // console.log(req.query); ==> returns an empty object
+                console.log(posts);
+                res.status(200).json(posts);
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({ error: 'The post information could not be retrieved.' });
+            });
+    }
+})
 
 // === 5 === When the client makes a `GET` request to `/api/posts/:id/comments`:
 router.get('/:id/comments', (req, res) => {
-    
-        if(!req.params.id === 0){
-            console.log(req.params.id);
+        const {id} = req.params;
+
+        if(id === 0){
+            console.log(id);
             res.status(404).json({ message: "The post with the specified ID does not exist."})
         } else{
-        Db.findCommentById(req.param.id)
+        Db.findCommentById(id)
         .then(comment => {
             console.log(comment);
             res.status(500).json({ error: "The comments information could not be retrieved." });
@@ -86,7 +107,7 @@ router.delete('/:id', (req, res) => {
         res.status(404).json({ message: "The post with the specified ID does not exist."})
     } else {
         Db.remove(id)
-            .then(id => {
+            .then(() => {
                 res.status(200).json({ message: "The post was deleted."})
             })
             .catch(error => {
