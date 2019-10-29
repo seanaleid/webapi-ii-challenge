@@ -80,10 +80,12 @@ router.get('/:id/comments', (req, res) => {
 
 // === 6 === When the client makes a `DELETE` request to `/api/posts/:id`:
 router.delete('/:id', (req, res) => {
-    if(req.body.id === null || req.body.id === {} || !req.body.id || req.params.id === req.body.id){
+    const {id} = req.params;
+
+    if(id === null || id === {} || !id || id === req.body.id){
         res.status(404).json({ message: "The post with the specified ID does not exist."})
     } else {
-        Db.remove(req.body.id)
+        Db.remove(id)
             .then(id => {
                 res.status(200).json({ message: "The post was deleted."})
             })
