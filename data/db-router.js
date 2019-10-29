@@ -2,17 +2,9 @@ const router = require('express').Router();
 
 const Db = require('./db');
 
-router.get('/', (req,res) => {
-    Db.find(req.query)
-        .then(posts => {
-            res.status(200).json(posts);
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json({ message: 'Error retrieving the posts.' });
-        });
-})
 
+
+// === 1=== When the client makes a `POST` request to `/api/posts`:
 router.post('/', (req, res) => {
     const postInfo = req.body;
 
@@ -29,7 +21,80 @@ router.post('/', (req, res) => {
     }
 })
 
+// === 2 === When the client makes a `POST` request to `/api/posts/:id/comments`:
+router.post('/:id/comments', (req, res) => {
+    const commentInfo = req.body;
 
+    if(commentInfo.id === 0){
+        console.log(commentInfo.id)
+        res.status(404).json({ message: "The post with the specified ID does not exist." })
+    }else if(!commentInfo.text){ 
+        console.log(commentInfo.text)
+        res.status(400).json({ errorMessage: "Please provide text for the comment." })
+    } else {
+        Db.insertComment(commentInfo)
+        .then(comment => {
+            console.log(comment)
+            res.status(201).json({comment})
+        })
+        .catch(post => {
+            res.status(500).json({ error: "There was an error while saving the comment to the database"})
+        })
+    }
+})
+
+
+// === 3 === When the client makes a `GET` request to `/api/posts`:
+router.get('/', (req,res) => {
+    Db.find(res.query)
+        .then(posts => {
+            // console.log(req.query); ==> returns an empty object
+            console.log(posts);
+            res.status(200).json(posts);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ error: 'The post information could not be retrieved.' });
+        });
+})
+
+
+// === 5 === When the client makes a `GET` request to `/api/posts/:id/comments`:
+router.get('/:id/comments', (req, res) => {
+    
+        if(!req.params.id === 0){
+            console.log(req.params.id);
+            res.status(404).json({ message: "The post with the specified ID does not exist."})
+        } else{
+        Db.findCommentById(req.param.id)
+        .then(comment => {
+            console.log(comment);
+            res.status(500).json({ error: "The comments information could not be retrieved." });
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ error: "The comments information could not be retrieved." });
+        });
+        }
+})
+
+// === 6 === When the client makes a `DELETE` request to `/api/posts/:id`:
+router.delete('/:id', (req, res) => {
+    if(req.body.id === null || req.body.id === {} || !req.body.id || req.params.id === req.body.id){
+        res.status(404).json({ message: "The post with the specified ID does not exist."})
+    } else {
+        Db.remove(req.body.id)
+            .then(id => {
+                res.status(200).json({ message: "The post was deleted."})
+            })
+            .catch(error => {
+            // log error to database
+            console.log(error);
+            res.status(500).json({
+                error: 'The post could not be removed.',});
+        })
+    }
+});
 
 module.exports = router;
 
