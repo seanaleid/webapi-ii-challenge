@@ -4,7 +4,7 @@ const Db = require('./db');
 
 
 
-// === 1=== When the client makes a `POST` request to `/api/posts`:
+// === 1 === When the client makes a `POST` request to `/api/posts`:
 router.post('/', (req, res) => {
     const postInfo = req.body;
 
@@ -22,22 +22,23 @@ router.post('/', (req, res) => {
 })
 
 // === 2 === When the client makes a `POST` request to `/api/posts/:id/comments`:
-router.post('/:id/comments', (req, res) => {
-    const commentInfo = req.body;
 
-    if(commentInfo.id === 0){
-        console.log(commentInfo.id)
+router.post('/:id/comments', (req, res) => {
+    const comment = req.body;
+
+    if(!comment.post_id || comment.post_id === {} || comment.post_id === null ){
+        // console.log(id)
         res.status(404).json({ message: "The post with the specified ID does not exist." })
-    }else if(!commentInfo.text){ 
-        console.log(commentInfo.text)
+    }else if(!comment.text){ 
+        // console.log(comment.text)
         res.status(400).json({ errorMessage: "Please provide text for the comment." })
     } else {
-        Db.insertComment(commentInfo)
-        .then(comment => {
-            console.log(comment)
-            res.status(201).json({comment})
+        Db.insertComment(comment)
+        .then(result => {
+            console.log(result)
+            res.status(201).json(result)
         })
-        .catch(post => {
+        .catch(error => {
             res.status(500).json({ error: "There was an error while saving the comment to the database"})
         })
     }
