@@ -124,12 +124,13 @@ router.delete('/:id', (req, res) => {
 // === 7 === When the client makes a `PUT` request to `/api/posts/:id`:
 router.put(`/:id`, (req, res) => {
     // const changes = req.body;
-    if(req.body.id === null || req.body.id === {} || !req.body.id || req.params.id === req.body.id){
+    const {id} = req.params;
+    if(id === null || id === {} || !id || req.params.id === req.body.id){
         res.status(404).json({ message: "The post with the specified ID does not exist." })
     } else if(!req.body.title || !req.body.contents){
         res.status(400).json({ errorMessage: "Please provide title and contents for the post." })
     } else {
-        Db.update(req.body.id, req.body)
+        Db.update(id, req.body)
         .then(updatePost => {
             console.log(updatePost);
             res.status(200).json(updatePost)
